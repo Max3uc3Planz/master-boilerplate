@@ -1,0 +1,114 @@
+version: '3.3'
+services:
+    adwords-gateway:
+        build:
+            dockerfile: ./src/symfony/Dockerfile
+            context: ./src
+        volumes:
+            - './src/symfony:/var/www/html/src:delegated'
+            - /var/www/html/src/var/
+            - /var/www/html/src/vendor/
+        environment:
+            APP_ENV: dev
+            API_ENDPOINT: 'https://api.catchr.local'
+            PHP_DISMOD: ioncube
+            PHP_MEMORY_LIMIT: 2G
+            CORS_ALLOW_ORIGIN: '*'
+            XDEBUG_REMOTE_AUTOSTART: 0
+            XDEBUG_PROFILER_ENABLE: 0
+            REDIS_URL: 'redis://redis'
+            SQS_ENDPOINT: 'http://queue:9324/'
+            DATABASE_URL: 'mysql://root:user@mysql/example_database'
+            MONGODB_HOST: mongodb
+            MONGODB_PORT: '27017'
+            MONGODB_USER: root
+            MONGODB_PASSWORD: root
+            MONGODB_DB: example_database
+        networks:
+            - network_default
+    mysql:
+        build:
+            dockerfile: /src/mysql/Dockerfile
+            context: ./src
+        environment:
+            MYSQL_DATABASE: example_database
+            MYSQL_USER: user
+            MYSQL_PASSWOR: user
+            MYSQL_ROOT_PASSWORD: user
+        healthcheck:
+            test:
+                - CMD-SHELL
+                - 'mysql --user=user --password=user -e "SHOW TABLES" example_database'
+            interval: 5s
+            timeout: 1s
+            retries: 10
+        ports:
+            - '3306:3306'
+        networks:
+            - network_default
+    mongodb:
+        build:
+            dockerfile: ./src/mongodb/Dockerfile
+            context: ./src
+        ports:
+            - '27017:27017'
+        environment:
+            CORS_ALLOW_ORIGIN: '*'
+            MONGO_INITDB_ROOT_USERNAME: root
+            MONGO_INITDB_ROOT_PASSWORD: root
+        networks:
+            - network_default
+    redis:
+        build:
+            dockerfile: ./src/redis/Dockerfile
+            context: ./src
+            args:
+                node_env_variable: production
+        environment:
+            ddtrace_app_name: redis
+            REDIS_URL: 'redis: // redis'
+            CORS_ALLOW_ORIGIN: '*'
+        networks:
+            - network_default
+    queue:
+        build:
+            dockerfile: ./src/queue/Dockerfile
+            context: ./src
+        ports:
+            - '9324:9324'
+        networks:
+            - network_default
+        environment:
+            CORS_ALLOW_ORIGIN: '*'
+    kong:
+        build:
+            dockerfile: ./src/kong/Dockerfile
+            context: ./src/kong
+        environment:
+            APP_ENV: dev
+            KONG_ADMIN_ACCESS_LOG: /dev/stdout
+            KONG_ADMIN_ERROR_LOG: /dev/stderr
+            KONG_ADMIN_LISTEN: '0.0.0.0:8001'
+            KONG_DECLARATIVE_CONFIG: /usr/local/kong/declarative/kong.yml
+            KONG_PROXY_ACCESS_LOG: /dev/stdout
+            KONG_PROXY_ERROR_LOG: /dev/stderr
+            KONG_DATABASE: 'off'
+            KONG_SSL_CERT: /ssl/localhost.crt
+            KONG_SSL_CERT_KEY: /ssl/localhost.key
+            CORS_ALLOW_ORIGIN: '*'
+            JWT_SECRET_KEY: 's3://catchr-dev/jwt/private.pem'
+            JWT_PUBLIC_KEY: 's3://catchr-dev/jwt/public.pem'
+            JWT_PASSPHRASE: zh7dkTLcdgpEb9xEZ2NWJBcqYqKJk64b
+        networks:
+            - network_default
+        volumes:
+            - './src/kong/config/ssl:/ssl'
+            - './src/kong/config/declarative.yaml:/usr/local/kong/declarative/kong.yml'
+        ports:
+            - '8000:8000/tcp'
+            - '8001:8001/tcp'
+            - '8443:8443/tcp'
+            - '8444:8444/tcp'
+networks:
+    network_default: null
+volumes: {  }

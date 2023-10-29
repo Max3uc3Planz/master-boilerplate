@@ -1,0 +1,37 @@
+_format_version: "1.1"
+
+services:
+    - name: symfony/api/v1
+      url: http://symfony/api/v1
+      routes:
+          - name: connections_logs
+            methods:
+                - OPTIONS
+                - GET
+                - POST
+                - PUT
+                - DELETE
+            paths:
+                - /api/v1
+plugins:
+    - name: cors
+      config:
+          origins:
+              - "localhost:3000"
+              - "http://localhost:3000"
+              - "http://localhost:3001"
+              - "https://localhost:3000"
+              - "https://127.0.0.1:3000"
+              - "https://localhost:3001"
+          methods:
+              - GET
+              - HEAD
+              - PUT
+              - PATCH
+              - POST
+              - DELETE
+              - OPTIONS
+              - TRACE
+              - CONNECT
+          credentials: true
+          max_age: 3600
