@@ -1,16 +1,16 @@
 version: '3.3'
 services:
-    adwords-gateway:
+    symfony:
         build:
-            dockerfile: ./src/symfony/Dockerfile
-            context: ./src
+            dockerfile: ./Dockerfile
+            context: ./src/symfony
         volumes:
             - './src/symfony:/var/www/html/src:delegated'
             - /var/www/html/src/var/
             - /var/www/html/src/vendor/
         environment:
             APP_ENV: dev
-            API_ENDPOINT: 'https://api.catchr.local'
+            API_ENDPOINT: 'https://api.example.local'
             PHP_DISMOD: ioncube
             PHP_MEMORY_LIMIT: 2G
             CORS_ALLOW_ORIGIN: '*'
@@ -28,12 +28,12 @@ services:
             - network_default
     mysql:
         build:
-            dockerfile: /src/mysql/Dockerfile
-            context: ./src
+            dockerfile: ./Dockerfile
+            context: ./src/mysql
         environment:
             MYSQL_DATABASE: example_database
             MYSQL_USER: user
-            MYSQL_PASSWOR: user
+            MYSQL_PASSWORD: user
             MYSQL_ROOT_PASSWORD: user
         healthcheck:
             test:
@@ -48,8 +48,8 @@ services:
             - network_default
     mongodb:
         build:
-            dockerfile: ./src/mongodb/Dockerfile
-            context: ./src
+            dockerfile: ./Dockerfile
+            context: ./src/mongodb
         ports:
             - '27017:27017'
         environment:
@@ -60,8 +60,8 @@ services:
             - network_default
     redis:
         build:
-            dockerfile: ./src/redis/Dockerfile
-            context: ./src
+            dockerfile: ./Dockerfile
+            context: ./src/redis
             args:
                 node_env_variable: production
         environment:
@@ -72,8 +72,8 @@ services:
             - network_default
     queue:
         build:
-            dockerfile: ./src/queue/Dockerfile
-            context: ./src
+            dockerfile: ./Dockerfile
+            context: ./src/queue
         ports:
             - '9324:9324'
         networks:
@@ -82,7 +82,7 @@ services:
             CORS_ALLOW_ORIGIN: '*'
     kong:
         build:
-            dockerfile: ./src/kong/Dockerfile
+            dockerfile: ./Dockerfile
             context: ./src/kong
         environment:
             APP_ENV: dev
@@ -92,13 +92,9 @@ services:
             KONG_DECLARATIVE_CONFIG: /usr/local/kong/declarative/kong.yml
             KONG_PROXY_ACCESS_LOG: /dev/stdout
             KONG_PROXY_ERROR_LOG: /dev/stderr
+            KONG_NGINX_PROXY_SET: '$$session_secret amUgc8OpY3VyaKJIHGENldHRlIHJvdXRl'
             KONG_DATABASE: 'off'
-            KONG_SSL_CERT: /ssl/localhost.crt
-            KONG_SSL_CERT_KEY: /ssl/localhost.key
             CORS_ALLOW_ORIGIN: '*'
-            JWT_SECRET_KEY: 's3://catchr-dev/jwt/private.pem'
-            JWT_PUBLIC_KEY: 's3://catchr-dev/jwt/public.pem'
-            JWT_PASSPHRASE: zh7dkTLcdgpEb9xEZ2NWJBcqYqKJk64b
         networks:
             - network_default
         volumes:

@@ -1,7 +1,7 @@
 _format_version: "1.1"
 
 services:
-    - name: symfony/api/v1
+    - name: symfony_api_v1
       url: http://symfony/api/v1
       routes:
           - name: connections_logs

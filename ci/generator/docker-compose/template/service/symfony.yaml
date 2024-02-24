@@ -1,6 +1,0 @@
-${SERVICE_NAME}:
-    build:
-        dockerfile: ${SERVICE_NAME}/Dockerfile
-        context: .
-    volumes:
-        - ''
